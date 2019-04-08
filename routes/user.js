@@ -22,7 +22,9 @@ router.route('/joinsuccess').get(function(req, res, next) {
 });
 
 router.route('/login').get(function(req, res, next) {
-  res.render('user/login', null);
+  res.render('user/login', {
+    result: res.params.result
+  });
 });
 
 router.route('/login').post(function(req, res, next) {
@@ -33,10 +35,24 @@ router.route('/login').post(function(req, res, next) {
     }
 
     // session 처리
+    req.session.loginUser = user;
     console.log(user);
 
     res.redirect('/');
   });
 });
+
+router.route('/logout').get(function(req, res, next) {
+  // 세션 없애기
+  req.session.destroy(function (err) {
+    if(err) {
+      next(err);
+      return;
+    }
+
+    res.redirect('/');
+  })
+});
+
 
 module.exports = router;

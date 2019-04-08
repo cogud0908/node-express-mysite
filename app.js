@@ -4,9 +4,11 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
+var session = require('express-session');
 
 var mainRouter = require('./routes/main');
 var userRouter = require('./routes/user');
+var apiRouter = require('./routes/api');
 
 var app = express();
 
@@ -23,8 +25,24 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// session 처리
+// Router앞에 해야 오류가 안남
+app.use(session({
+  secret: "mysite-session",
+  resave: true,
+  saveUninitialized: true
+}));
+
+// 모든 접근제어 - next 중요
+app.all('*', function (req,res, next) {
+  res.locals.req=req;
+  res.locals.res=res;
+  next();
+});
+
 app.use('/', mainRouter);
 app.use('/user', userRouter);
+app.use('/api', apiRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
